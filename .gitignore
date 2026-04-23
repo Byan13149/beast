@@ -184,3 +184,8 @@ app.log
 # data
 data/
 *.png
+
+*.out
+*.err
+
+*.sh

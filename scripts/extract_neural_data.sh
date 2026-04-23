@@ -1,12 +1,14 @@
 #!/bin/bash
-#SBATCH -A bezq-delta-cpu 
+#SBATCH -A MPHIL-DIS-SL2-CPU
 #SBATCH --job-name="extract"
-#SBATCH --output="extract.%j.out"
-#SBATCH --partition=cpu
-#SBATCH -c 1
+#SBATCH --output=extract_%A_%a.out
+#SBATCH --error=extract_%A_%a.err
 #SBATCH --mem 200000
 #SBATCH -t 0-00:30:00
 #SBATCH --export=ALL
+#SBATCH -p icelake
+
+export PYTHONUNBUFFERED=1
 
 # Load environment
 . ~/.bashrc
@@ -17,7 +19,6 @@ eid=${1}
 one_cache_path=${2}
 video_timestamps=${3}
 output_path=${4}
-num_trials=${5}
 # CPUs assigned to this task
 n_workers="${SLURM_CPUS_PER_TASK:-1}"
 
@@ -33,7 +34,6 @@ python beast/extract_neural_data.py --eid "$eid" \
   --one_cache_path "$one_cache_path" \
   --video_timestamps "$video_timestamps" \
   --output_path "$output_path" \
-  --num_trials "$num_trials" \
   --n_workers "$n_workers"
 
 # Deactivate environment

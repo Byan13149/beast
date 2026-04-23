@@ -5,7 +5,7 @@ model:
   model_class: resnet
   model_params:
     backbone: resnet18
-    num_latents: 50  # null is a fully convolutional model, integer value forces bottleneck
+    num_latents: 100  # null is a fully convolutional model, integer value forces bottleneck
     image_size: 224  # usually 224
     num_channels: 3  # 3 for RGB
 

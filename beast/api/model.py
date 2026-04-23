@@ -11,9 +11,13 @@ from typeguard import typechecked
 from beast.inference import predict_images, predict_video
 from beast.models.base import BaseLightningModel
 from beast.models.resnets import ResnetAutoencoder
-from beast.models.vits import VisionTransformer
 from beast.train import train
 from beast import log_step
+
+
+def _lazy_vit():
+    from beast.models.vits import VisionTransformer
+    return VisionTransformer
 
 
 # TODO: Replace with contextlib.chdir in python 3.11.
@@ -35,10 +39,15 @@ class Model:
     """
 
     MODEL_REGISTRY = {
-        'vit': VisionTransformer,
+        'vit': _lazy_vit,
         'resnet': ResnetAutoencoder,
         # Add more models as needed
     }
+
+    @classmethod
+    def _resolve_model_class(cls, model_type: str):
+        entry = cls.MODEL_REGISTRY[model_type]
+        return entry() if not isinstance(entry, type) else entry
 
     def __init__(
         self,
@@ -76,7 +85,7 @@ class Model:
             raise ValueError(f'Unknown model type: {model_type}')
 
         # Initialize the LightningModule
-        model_class = cls.MODEL_REGISTRY[model_type]
+        model_class = cls._resolve_model_class(model_type)
         model = model_class(config)
 
         print(f'Loaded a {model_class} model')
@@ -113,7 +122,7 @@ class Model:
             raise ValueError(f'Unknown model type: {model_type}')
 
         # Initialize the LightningModule
-        model_class = cls.MODEL_REGISTRY[model_type]
+        model_class = cls._resolve_model_class(model_type)
         log_step(f"Creating {model_type} model instance", level='debug')
         log_step(
             f"About to call {model_class.__name__}.__init__() - this may take several minutes if downloading pretrained weights",
